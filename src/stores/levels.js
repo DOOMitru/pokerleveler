@@ -112,8 +112,10 @@ const FTAP_LEVELS = [
 
 export const secondsToTime = seconds => {
     const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor(seconds / 60)
-    const secondsLeft = seconds % 60
+    let secondsLeft = seconds % 3600
+    
+    const minutes = Math.floor(secondsLeft / 60)
+    secondsLeft = secondsLeft % 60
 
     const hoursStr = hours < 10 ? '0' + hours : hours
     const minStr = minutes < 10 ? '0' + minutes : minutes

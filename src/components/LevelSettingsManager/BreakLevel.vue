@@ -15,10 +15,26 @@
             input-class="text-center text-weight-bold"
             v-model="duration">
             <template #prepend v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="do_not_disturb_on"></q-btn>
+                <q-btn
+                    @click="subtractMinutes"
+                    @mousedown="continuouslySubMinutes"
+                    @mouseup="stopContinuouslySubMinutes"
+                    flat
+                    dense
+                    round
+                    size="sm"
+                    icon="do_not_disturb_on"></q-btn>
             </template>
             <template #append v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="add_circle"></q-btn>
+                <q-btn
+                    @click="addMinutes"
+                    @mousedown="continuouslyAddMinutes"
+                    @mouseup="stopContinuouslyAddMinutes"
+                    flat
+                    dense
+                    round
+                    size="sm"
+                    icon="add_circle"></q-btn>
             </template>
         </q-input>
         <q-btn
@@ -49,5 +65,32 @@ const isValid = computed(() => getDurationInSeconds(duration.value) > 0)
 
 const update = () => {
     if (!isValid.value) return
+}
+
+const addMinutes = () => {
+    const seconds = getDurationInSeconds(duration.value)
+    duration.value = secondsToTime(seconds + 60)
+}
+
+let addInterval = null
+const continuouslyAddMinutes = () => {
+    addInterval = setInterval(addMinutes, 200)
+}
+const stopContinuouslyAddMinutes = () => {
+    clearInterval(addInterval)
+}
+
+const subtractMinutes = () => {
+    const seconds = getDurationInSeconds(duration.value)
+    duration.value = secondsToTime(seconds - 60 < 0 ? 0 : seconds - 60)
+}
+
+let subtractInterval = null
+const continuouslySubMinutes = () => {
+    subtractInterval = setInterval(subtractMinutes, 200)
+}
+
+const stopContinuouslySubMinutes = () => {
+    clearInterval(subtractInterval)
 }
 </script>
