@@ -1,11 +1,64 @@
 // app global css in SCSS form
 .blind-level-title {
+    border-radius: 5px;
     background-color: #336699;
     border: 1px solid hwb(207 84% 12%);
-    padding: 3px 15px;
+}
+
+.break-level-title {
+    border-radius: 5px;
+    background-color: #043642;
+    border: 1px solid hwb(207 84% 12%);
 }
 
 .blind-level-remove-button {
-    border: 1px solid hwb(207 84% 12%);
     padding: 7px;
+    border: 1px solid hwb(207 84% 12%);
+}
+
+.blind-level-container {
+    display: flex;
+    flex-direction: row;
+    padding-top: 5px;
+}
+
+.break-title-item {
+    flex: 3;
+    padding-right: 0.5rem;
+    margin-right: 5px;
+    border-radius: 5px;
+    background-color: #043642;
+    border: 1px solid hwb(207 84% 12%);
+}
+
+.blind-level-item {
+    flex: 1;
+    margin-right: 5px;
+}
+
+.blind-level-item:first-child {
+    flex: 0 0 50px;
+    margin-left: 5px;
+}
+
+.blind-level-item:last-child {
+    flex: 0 0 50px;
+}
+
+.level-label-item {
+    flex: 1;
+    margin-right: 5px;
+}
+
+.level-label-item:first-child {
+    flex: 0 0 50px;
+    margin-left: 5px;
+}
+
+.level-label-item:last-child {
+    flex: 0 0 50px;
+}
+
+.break-level-icon:hover {
+    cursor: move;
 }
