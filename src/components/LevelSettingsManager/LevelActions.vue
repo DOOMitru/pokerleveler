@@ -1,6 +1,7 @@
 <template>
     <q-card-actions>
         <q-btn @click="emit('set-ftap-levels')" color="primary" label="FTAP levels"> </q-btn>
+        <q-btn @click="gotoFtap" flat round color="secondary" icon="info"> </q-btn>
         <q-space></q-space>
         <q-btn @click="emit('add-level', LEVEL_TYPES.BLIND)" color="primary" label="Add level">
         </q-btn>
@@ -12,4 +13,6 @@
 <script setup>
 import { LEVEL_TYPES } from 'src/stores/levels'
 const emit = defineEmits(['add-level', 'set-ftap-levels'])
+
+const gotoFtap = () => window.open('https://firsttoactpoker.com/', '_blank')
 </script>

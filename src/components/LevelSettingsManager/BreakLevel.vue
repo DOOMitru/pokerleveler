@@ -5,36 +5,38 @@
         </div>
         <div class="text-h6 flex flex-center break-title-item">BREAK</div>
         <q-input
-            @blur="update"
-            @keyup.enter="update"
+            @blur="updateDuration"
+            @keyup.enter="updateDuration"
             dense
             outlined
             class="blind-level-item"
-            :color="isValid ? 'primary' : 'negative'"
-            :bg-color="isValid ? 'grey-9' : 'negative'"
+            :color="durationValid ? 'primary' : 'negative'"
+            :bg-color="durationValid ? 'grey-9' : 'negative'"
             input-class="text-center text-weight-bold"
             v-model="duration">
             <template #prepend v-if="q.screen.gt.sm">
                 <q-btn
                     @click="subtractMinutes"
-                    @mousedown="continuouslySubMinutes"
-                    @mouseup="stopContinuouslySubMinutes"
+                    @mousedown="durationSubTimer.start()"
+                    @mouseup="durationSubTimer.stop()"
                     flat
                     dense
                     round
                     size="sm"
-                    icon="do_not_disturb_on"></q-btn>
+                    icon="do_not_disturb_on">
+                </q-btn>
             </template>
             <template #append v-if="q.screen.gt.sm">
                 <q-btn
                     @click="addMinutes"
-                    @mousedown="continuouslyAddMinutes"
-                    @mouseup="stopContinuouslyAddMinutes"
+                    @mousedown="durationAddTimer.start()"
+                    @mouseup="durationAddTimer.stop()"
                     flat
                     dense
                     round
                     size="sm"
-                    icon="add_circle"></q-btn>
+                    icon="add_circle">
+                </q-btn>
             </template>
         </q-input>
         <q-btn
@@ -48,7 +50,15 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useQuasar } from 'quasar'
-import { secondsToTime, getDurationInSeconds } from 'src/stores/levels'
+
+import {
+    addDurationTime,
+    subDurationTime,
+    secondsToTime,
+    getDurationInSeconds,
+} from 'src/stores/levels'
+
+import ContinuousButtonTimer from 'src/js/ContinuousButtonTimer'
 
 const q = useQuasar()
 const emit = defineEmits(['remove-level'])
@@ -61,36 +71,15 @@ const props = defineProps({
 })
 
 const duration = ref(secondsToTime(props.level.duration))
-const isValid = computed(() => getDurationInSeconds(duration.value) > 0)
+const durationValid = computed(() => getDurationInSeconds(duration.value) > 0)
 
-const update = () => {
-    if (!isValid.value) return
-}
-
-const addMinutes = () => {
-    const seconds = getDurationInSeconds(duration.value)
-    duration.value = secondsToTime(seconds + 60)
+const updateDuration = () => {
+    if (!durationValid.value) return
 }
 
-let addInterval = null
-const continuouslyAddMinutes = () => {
-    addInterval = setInterval(addMinutes, 200)
-}
-const stopContinuouslyAddMinutes = () => {
-    clearInterval(addInterval)
-}
+const addMinutes = () => (duration.value = addDurationTime(duration.value))
+const subtractMinutes = () => (duration.value = subDurationTime(duration.value))
 
-const subtractMinutes = () => {
-    const seconds = getDurationInSeconds(duration.value)
-    duration.value = secondsToTime(seconds - 60 < 0 ? 0 : seconds - 60)
-}
-
-let subtractInterval = null
-const continuouslySubMinutes = () => {
-    subtractInterval = setInterval(subtractMinutes, 200)
-}
-
-const stopContinuouslySubMinutes = () => {
-    clearInterval(subtractInterval)
-}
+const durationAddTimer = new ContinuousButtonTimer(addMinutes)
+const durationSubTimer = new ContinuousButtonTimer(subtractMinutes)
 </script>

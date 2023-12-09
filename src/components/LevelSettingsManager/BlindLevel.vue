@@ -4,63 +4,78 @@
             <span v-if="index < 10" class="text-primary">0</span>{{ index }}
         </div>
         <q-input
+            @change="updateAnte"
             dense
             outlined
-            color="primary"
-            bg-color="grey-9"
+            min="0"
+            step="1"
+            type="number"
             class="blind-level-item"
+            :color="anteValid ? 'primary' : 'negative'"
+            :bg-color="anteValid ? 'grey-9' : 'negative'"
             input-class="text-center text-weight-bold"
-            :model-value="ante">
-            <template #prepend v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="do_not_disturb_on"></q-btn>
-            </template>
-            <template #append v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="add_circle"></q-btn>
-            </template>
+            v-model.number="ante">
         </q-input>
         <q-input
+            @change="updateSmallBlind"
             dense
             outlined
-            color="primary"
-            bg-color="grey-9"
+            min="0"
+            :max="bigBlind === 0 ? 0 : bigBlind - 1"
+            step="1"
+            type="number"
             class="blind-level-item"
+            :color="smallBlind ? 'primary' : 'negative'"
+            :bg-color="smallBlind ? 'grey-9' : 'negative'"
             input-class="text-center text-weight-bold"
-            :model-value="smallBlind">
-            <template #prepend v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="do_not_disturb_on"></q-btn>
-            </template>
-            <template #append v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="add_circle"></q-btn>
-            </template>
+            v-model.number="smallBlind">
         </q-input>
         <q-input
+            @change="updateBigBlind"
             dense
             outlined
-            color="primary"
-            bg-color="grey-9"
+            min="0"
+            step="1"
+            type="number"
             class="blind-level-item"
+            :color="bigBlind ? 'primary' : 'negative'"
+            :bg-color="bigBlind ? 'grey-9' : 'negative'"
             input-class="text-center text-weight-bold"
-            :model-value="bigBlind">
-            <template #prepend v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="do_not_disturb_on"></q-btn>
-            </template>
-            <template #append v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="add_circle"></q-btn>
-            </template>
+            v-model="bigBlind">
         </q-input>
         <q-input
+            @blur="updateDuration"
+            @keyup.enter="updateDuration"
             dense
             outlined
-            color="primary"
-            bg-color="grey-9"
             class="blind-level-item"
+            :color="durationValid ? 'primary' : 'negative'"
+            :bg-color="durationValid ? 'grey-9' : 'negative'"
             input-class="text-center text-weight-bold"
             :model-value="duration">
             <template #prepend v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="do_not_disturb_on"></q-btn>
+                <q-btn
+                    @click="subtractMinutes"
+                    @mousedown="durationSubTimer.start()"
+                    @mouseup="durationSubTimer.stop()"
+                    flat
+                    dense
+                    round
+                    size="sm"
+                    icon="do_not_disturb_on">
+                </q-btn>
             </template>
             <template #append v-if="q.screen.gt.sm">
-                <q-btn flat dense round size="sm" icon="add_circle"></q-btn>
+                <q-btn
+                    @click="addMinutes"
+                    @mousedown="durationAddTimer.start()"
+                    @mouseup="durationAddTimer.stop()"
+                    flat
+                    dense
+                    round
+                    size="sm"
+                    icon="add_circle">
+                </q-btn>
             </template>
         </q-input>
         <q-btn
@@ -72,9 +87,17 @@
     </q-card-section>
 </template>
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useQuasar } from 'quasar'
-import { secondsToTime } from 'src/stores/levels'
+
+import {
+    addDurationTime,
+    subDurationTime,
+    secondsToTime,
+    getDurationInSeconds,
+} from 'src/stores/levels'
+
+import ContinuousButtonTimer from 'src/js/ContinuousButtonTimer'
 
 const q = useQuasar()
 const emit = defineEmits(['remove-level'])
@@ -87,8 +110,51 @@ const props = defineProps({
 })
 
 const index = computed(() => props.level.level)
-const duration = computed(() => secondsToTime(props.level.duration))
-const smallBlind = computed(() => props.level.smallBlind)
-const bigBlind = computed(() => props.level.bigBlind)
-const ante = computed(() => props.level.ante)
+
+const duration = ref(secondsToTime(props.level.duration))
+const durationValid = computed(() => getDurationInSeconds(duration.value) > 0)
+
+const addMinutes = () => (duration.value = addDurationTime(duration.value))
+const subtractMinutes = () => (duration.value = subDurationTime(duration.value))
+
+const durationAddTimer = new ContinuousButtonTimer(addMinutes)
+const durationSubTimer = new ContinuousButtonTimer(subtractMinutes)
+
+const updateDuration = () => {
+    console.log('updateDuration...')
+    if (!durationValid.value) return
+}
+
+const ante = ref(props.level.ante)
+const anteValid = computed(() => {
+    if (`${ante.value}`.length === 0) return false
+    return ante.value >= 0
+})
+
+const updateAnte = () => {
+    console.log('updateAnte...')
+    if (!anteValid.value) return
+}
+
+const bigBlind = ref(props.level.bigBlind)
+const bigBlindValid = computed(() => {
+    if (`${bigBlind.value}`.length === 0) return false
+    return bigBlind.value > 0
+})
+
+const updateBigBlind = () => {
+    console.log('updateBigBlind...')
+    if (!bigBlindValid.value) return
+}
+
+const smallBlind = ref(props.level.smallBlind)
+const smallBlindValid = computed(() => {
+    if (`${smallBlind.value}`.length === 0) return false
+    return smallBlind.value > 0 && smallBlind.value < bigBlind.value
+})
+
+const updateSmallBlind = () => {
+    console.log('updateSmallBlind...')
+    if (!smallBlindValid.value) return
+}
 </script>

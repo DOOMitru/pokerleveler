@@ -113,7 +113,7 @@ const FTAP_LEVELS = [
 export const secondsToTime = seconds => {
     const hours = Math.floor(seconds / 3600)
     let secondsLeft = seconds % 3600
-    
+
     const minutes = Math.floor(secondsLeft / 60)
     secondsLeft = secondsLeft % 60
 
@@ -150,6 +150,15 @@ export const getDurationInSeconds = str => {
     return hours * 3600 + minutes * 60 + seconds
 }
 
+export const subDurationTime = (str, seconds = 60) => {
+    const current = getDurationInSeconds(str)
+    return secondsToTime(current - seconds < 0 ? 0 : current - seconds)
+}
+
+export const addDurationTime = (str, seconds = 60) => {
+    return secondsToTime(getDurationInSeconds(str) + seconds)
+}
+
 export const useLevelsStore = defineStore('levels', () => {
     const MIN_ANTE = ref(0)
     const MIN_BIG_BLIND = ref(2)
@@ -180,25 +189,26 @@ export const useLevelsStore = defineStore('levels', () => {
     }
 
     const removeLevel = ({ id }) => {
-        let blindIndex = 1, breakIndex = 1
+        let blindIndex = 1,
+            breakIndex = 1
 
         levels.value = levels.value.filter(l => l.id !== id)
 
         levels.value.forEach(l => {
-            if(l.type === LEVEL_TYPES.BLIND) {
+            if (l.type === LEVEL_TYPES.BLIND) {
                 l.level = blindIndex++
             } else l.level = breakIndex++
         })
     }
 
-    const setFtapLevels = () =>  {
+    const setFtapLevels = () => {
         levels.value = JSON.parse(JSON.stringify(FTAP_LEVELS))
     }
 
     const onEndSortEvent = event => {
         const { newIndex, oldIndex } = event
         const level = levels.value[oldIndex]
-        
+
         levels.value.splice(oldIndex, 1)
         levels.value.splice(newIndex, 0, level)
     }
